@@ -78,7 +78,10 @@ function App() {
     fetch(GITHUB_CONTENTS_URL)
       .then((res) => res.json())
       .then((data) => {
-        const csvText = atob(data.content);
+        // GitHub の Base64 を UTF-8 として正しくデコードする
+        const binary = atob(data.content);
+        const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+        const csvText = new TextDecoder("utf-8").decode(bytes);
 
         Papa.parse(csvText, {
           header: false,
@@ -98,6 +101,7 @@ function App() {
       })
       .catch((err) => console.error("GitHub CSV 読み込み失敗:", err));
   }, []);
+
 
   // ローカル CSV 読み込み
   const handleUpload = (e) => {
